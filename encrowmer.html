@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>encrowmer — охотник за упущенной прибылью</title>
+    <meta name="description" content="Нахожу и устраняю точки, где бизнес теряет клиентов. Без воды. 3 дня. Вы в безоговорочном плюсе.">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #0d0d0d;
+            --border: #1a1a1a;
+            --border-light: #262626;
+            --text: #c0c0c0;
+            --text-dim: #6a6a6a;
+            --text-muted: #4a4a4a;
+            --red: #b81c1c;
+            --red-glow: #d42020;
+            --green: #2ecc71;
+            --gold: #7a6548;
+            --gold-light: #9e8a6b;
+            --cream: #e8dcc8;
+            --teal: #1a3a3a;
+            --orange: #c85a17;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Space Mono', 'Courier New', monospace;
+            line-height: 1.7;
+            overflow-x: hidden;
+            cursor: default;
+            position: relative;
+            background-image:
+                    radial-gradient(ellipse at 15% 40%, rgba(200, 90, 23, 0.03) 0%, transparent 55%),
+                    radial-gradient(ellipse at 85% 30%, rgba(184, 28, 28, 0.025) 0%, transparent 50%),
+                    radial-gradient(ellipse at 50% 85%, rgba(122, 101, 72, 0.025) 0%, transparent 50%);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.02;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 1.6rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        a, button {
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: inherit;
+        }
+
+        ::selection {
+            background: var(--orange);
+            color: #0a0a0a;
+        }
+
+        /* ---------- ТИПОГРАФИКА ---------- */
+        .highlight-red {
+            background: var(--red);
+            color: #f0f0f0;
+            padding: 0.1rem 0.4rem;
+            display: inline;
+        }
+        .highlight-green {
+            background: var(--green);
+            color: var(--bg);
+            padding: 0.1rem 0.4rem;
+            display: inline;
+        }
+        .highlight-orange {
+            background: var(--orange);
+            color: #f0f0f0;
+            padding: 0.1rem 0.4rem;
+            display: inline;
+        }
+        .dim {
+            color: var(--text-dim);
+        }
+        .muted {
+            color: var(--text-muted);
+        }
+        .gold {
+            color: var(--gold-light);
+        }
+        .cream {
+            color: var(--cream);
+        }
+        .serif {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-weight: 700;
+        }
+        .display-serif {
+            font-family: 'DM Serif Display', 'Playfair Display', Georgia, serif;
+        }
+
+        /* ---------- АТМОСФЕРНЫЕ ВСТАВКИ ---------- */
+        .whisper {
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-style: italic;
+        }
+        .stage-direction {
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+        .pulp-label {
+            display: inline-block;
+            background: var(--orange);
+            color: #0a0a0a;
+            font-size: 0.55rem;
+            font-weight: 700;
+            padding: 0.15rem 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transform: rotate(-1deg);
+            margin-bottom: 0.8rem;
+        }
+
+        /* ---------- РАЗДЕЛИТЕЛИ ---------- */
+        .divider-hunt {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2.5rem 0;
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            user-select: none;
+        }
+        .divider-hunt::before,
+        .divider-hunt::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: transparent;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .divider-hunt .cross {
+            font-size: 0.8rem;
+            color: var(--orange);
+            flex-shrink: 0;
+            font-weight: 700;
+        }
+
+        /* Винтажный разделитель с кругом */
+        .divider-vinyl {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 2.5rem 0;
+            user-select: none;
+        }
+        .divider-vinyl::before,
+        .divider-vinyl::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--border-light), transparent);
+        }
+        .divider-vinyl .groove {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--border-light);
+            border-radius: 50%;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .divider-vinyl .groove::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: var(--orange);
+            border-radius: 50%;
+        }
+
+        /* ---------- HEADER ---------- */
+        header {
+            border-bottom: 3px double var(--border);
+            padding: 2rem 0 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .logo-line {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+        .logo {
+            font-family: 'DM Serif Display', 'Playfair Display', Georgia, serif;
+            font-weight: 400;
+            font-size: 2rem;
+            letter-spacing: 1px;
+            color: #e0e0e0;
+            font-style: italic;
+        }
+        .logo .mark {
+            color: var(--orange);
+            font-style: normal;
+            font-size: 1.8rem;
+        }
+        .tagline {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+        .contact-badge {
+            background: var(--surface);
+            border: 1px solid var(--border-light);
+            padding: 0.5rem 1.4rem;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--text);
+            transition: 0.3s;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+        .contact-badge:hover {
+            border-color: var(--orange);
+            color: #f0f0f0;
+            background: #1a1a1a;
+        }
+
+        /* ---------- HERO ---------- */
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.2rem;
+            margin: 2rem 0 3rem;
+        }
+        @media (min-width: 768px) {
+            .hero-grid {
+                max-width: 700px;
+            }
+        }
+        .hero-title {
+            font-family: 'DM Serif Display', 'Playfair Display', Georgia, serif;
+            font-weight: 400;
+            font-size: clamp(2.8rem, 7.5vw, 5.2rem);
+            line-height: 0.9;
+            text-transform: uppercase;
+            color: #ededed;
+            letter-spacing: -1px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s cubic-bezier(0.22, 1, 0.36, 1), transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .hero-title.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .hero-title .red-block {
+            color: var(--orange);
+            font-style: italic;
+        }
+        .hero-sub {
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin: 0.6rem 0 1.6rem;
+            font-style: italic;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
+        }
+        .hero-sub.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .hero-desc {
+            font-size: 0.95rem;
+            color: #9a9a9a;
+            max-width: 85%;
+            border-left: 3px solid var(--orange);
+            padding-left: 1.4rem;
+            opacity: 0;
+            transform: translateX(-15px);
+            transition: opacity 0.9s ease 0.35s, transform 0.9s ease 0.35s;
+            line-height: 1.6;
+        }
+        .hero-desc.revealed {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.9rem;
+            margin-top: 1.8rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease 0.5s, transform 0.8s ease 0.5s;
+        }
+        .cta-row.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .btn-red {
+            background: var(--orange);
+            border: 2px solid var(--orange);
+            color: #0a0a0a;
+            font-weight: 700;
+            padding: 0.85rem 2.2rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: 0.3s;
+            display: inline-block;
+            font-family: 'Space Mono', monospace;
+        }
+        .btn-red:hover {
+            background: transparent;
+            color: var(--orange);
+        }
+        .btn-outline {
+            border: 2px solid var(--border-light);
+            padding: 0.85rem 1.8rem;
+            font-weight: 700;
+            color: #b0b0b0;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: 0.3s;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+        }
+        .btn-outline:hover {
+            border-color: var(--orange);
+            color: #f0f0f0;
+        }
+
+        /* ---------- СЧЁТЧИК ---------- */
+        .loss-counter {
+            border: 2px dashed var(--orange);
+            padding: 1.2rem 1.5rem;
+            text-align: center;
+            margin: 1.5rem 0;
+            background: rgba(200, 90, 23, 0.03);
+            font-size: 0.8rem;
+            color: #9a9a9a;
+            transition: border-color 0.4s, background 0.4s;
+            cursor: default;
+            position: relative;
+        }
+        .loss-counter::before {
+            content: '!';
+            position: absolute;
+            top: -0.7rem;
+            left: 1.2rem;
+            background: var(--bg);
+            color: var(--orange);
+            font-size: 0.7rem;
+            padding: 0 0.6rem;
+            font-weight: 700;
+        }
+        .loss-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 2.6rem;
+            font-weight: 700;
+            color: var(--orange);
+            display: block;
+            line-height: 1;
+            transition: color 0.5s, transform 0.4s;
+        }
+        .loss-label {
+            transition: color 0.4s;
+            font-size: 0.72rem;
+            letter-spacing: 1px;
+        }
+        .loss-counter.green-mode {
+            border-color: var(--green);
+            background: rgba(46, 204, 113, 0.03);
+        }
+        .loss-counter.green-mode::before {
+            content: '+';
+            color: var(--green);
+        }
+        .loss-counter.green-mode .loss-number {
+            color: var(--green);
+            transform: scale(1.05);
+        }
+
+        /* ---------- СТАТ-БЛОК ---------- */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            margin: 3rem 0;
+            border: 1px solid var(--border);
+            background: var(--border);
+        }
+        @media (max-width: 600px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .stat-cell {
+            background: var(--surface);
+            padding: 1.8rem 1rem;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+            position: relative;
+        }
+        .stat-cell.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .stat-cell .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: var(--border-light);
+        }
+        .stat-num {
+            font-family: 'DM Serif Display', 'Playfair Display', Georgia, serif;
+            font-size: 2.6rem;
+            font-weight: 400;
+            color: var(--orange);
+            line-height: 1;
+            display: block;
+            margin-top: 0.3rem;
+        }
+        .stat-lbl {
+            color: var(--text-dim);
+            text-transform: uppercase;
+            font-size: 0.55rem;
+            letter-spacing: 2px;
+            margin-top: 0.5rem;
+        }
+
+        /* ---------- СЕКЦИИ ---------- */
+        .section-head {
+            text-align: center;
+            margin: 3.5rem 0 2rem;
+            opacity: 0;
+            transform: translateY(25px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .section-head.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .section-head .numeral {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 0.85rem;
+            color: var(--orange);
+            letter-spacing: 5px;
+            display: block;
+            margin-bottom: 0.4rem;
+            font-style: italic;
+        }
+        .section-head h2 {
+            font-family: 'DM Serif Display', 'Playfair Display', Georgia, serif;
+            font-weight: 400;
+            font-size: clamp(1.6rem, 5vw, 2.2rem);
+            color: #d8d8d8;
+            letter-spacing: 0.5px;
+        }
+        .section-head .subtitle {
+            color: var(--text-dim);
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 0.4rem;
+            font-style: italic;
+        }
+
+        /* ---------- ПРОЦЕСС ---------- */
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+            counter-reset: step;
+        }
+        .process-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.8rem 1.6rem;
+            position: relative;
+            opacity: 0;
+            transform: translateY(25px);
+            transition: opacity 0.7s ease, transform 0.7s ease, border-color 0.3s;
+            overflow: hidden;
+        }
+        .process-card.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .process-card:hover {
+            border-color: var(--border-light);
+        }
+        .process-card::after {
+            counter-increment: step;
+            content: '0' counter(step);
+            position: absolute;
+            bottom: -0.5rem;
+            right: 0.5rem;
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 4rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.012);
+            line-height: 1;
+        }
+        .process-card .step-symbol {
+            font-size: 1rem;
+            color: var(--orange);
+            margin-bottom: 0.8rem;
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 1px;
+        }
+        .process-card h4 {
+            font-family: 'DM Serif Display', 'Playfair Display', Georgia, serif;
+            font-weight: 400;
+            font-size: 1rem;
+            color: #c8c8c8;
+            margin-bottom: 0.4rem;
+        }
+        .process-card p {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        /* ---------- БЛОК ПРОЗРАЧНОСТИ ---------- */
+        .trust-note {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.8rem 2rem;
+            margin: 2rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: flex-start;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+            position: relative;
+        }
+        .trust-note.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .trust-note::before {
+            content: 'без бюрократии';
+            position: absolute;
+            top: -0.55rem;
+            left: 1.2rem;
+            background: var(--bg);
+            color: var(--orange);
+            font-size: 0.55rem;
+            padding: 0 0.8rem;
+            letter-spacing: 2px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .trust-note .col {
+            flex: 1;
+            min-width: 180px;
+        }
+        .trust-note .col .icon {
+            color: var(--green);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            font-family: 'Space Mono', monospace;
+        }
+        .trust-note h5 {
+            font-family: 'DM Serif Display', 'Playfair Display', Georgia, serif;
+            font-weight: 400;
+            font-size: 0.95rem;
+            color: #c8c8c8;
+            margin-bottom: 0.3rem;
+        }
+        .trust-note p {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        /* ---------- ТРОФЕИ ---------- */
+        .trophy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.2rem;
+            margin: 2rem 0;
+        }
+        .trophy-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.7s ease, transform 0.7s ease, border-color 0.3s;
+            position: relative;
+        }
+        .trophy-card.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .trophy-card:hover,
+        .trophy-card.active {
+            border-color: var(--orange);
+        }
+        .trophy-card .toggle-mark {
+            position: absolute;
+            bottom: 0.8rem;
+            right: 1rem;
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        .trophy-card:hover .toggle-mark,
+        .trophy-card.active .toggle-mark {
+            color: var(--orange);
+        }
+        .trophy-card .trophy-symbol {
+            font-size: 1rem;
+            color: var(--orange);
+            margin-bottom: 0.5rem;
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 1px;
+        }
+        .trophy-card .trophy-name {
+            font-family: 'DM Serif Display', 'Playfair Display', Georgia, serif;
+            font-weight: 400;
+            font-size: 1.2rem;
+            color: #c8c8c8;
+        }
+        .trophy-card .trophy-type {
+            color: var(--orange);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 0.2rem;
+        }
+        .trophy-card .trophy-detail {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease, margin 0.4s, padding 0.4s;
+            opacity: 0;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 0;
+            white-space: pre-wrap;
+            border-top: 1px solid var(--border);
+            padding-top: 0;
+            line-height: 1.5;
+        }
+        .trophy-card:hover .trophy-detail,
+        .trophy-card.active .trophy-detail {
+            max-height: 300px;
+            opacity: 1;
+            margin-top: 1rem;
+            padding-top: 0.8rem;
+        }
+        .red-label {
+            color: var(--red);
+            font-weight: 700;
+        }
+        .green-label {
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        /* ---------- ОТЗЫВЫ ---------- */
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.2rem;
+            margin: 2rem 0;
+        }
+        .review-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.5rem 1.5rem 1.5rem 2.2rem;
+            position: relative;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.7s ease, transform 0.7s ease, border-color 0.3s;
+            border-left: 3px solid var(--border);
+        }
+        .review-card.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .review-card:hover {
+            border-left-color: var(--orange);
+        }
+        .review-card::before {
+            content: '\201C';
+            position: absolute;
+            top: 1rem;
+            left: 0.3rem;
+            color: var(--orange);
+            font-size: 1.5rem;
+            font-family: Georgia, serif;
+            font-weight: 700;
+        }
+        .review-text {
+            font-size: 0.85rem;
+            color: #9a9a9a;
+            line-height: 1.6;
+            font-style: italic;
+        }
+        .review-footer {
+            margin-top: 1.2rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .review-author {
+            font-family: 'DM Serif Display', 'Playfair Display', Georgia, serif;
+            font-weight: 400;
+            font-size: 0.9rem;
+            color: #c8c8c8;
+            font-style: normal;
+        }
+        .review-role {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-style: normal;
+        }
+        .review-stars {
+            color: var(--orange);
+            letter-spacing: 3px;
+            font-size: 0.7rem;
+        }
+
+        /* ---------- УСТАНОВКА ---------- */
+        .install-note {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.2rem 1.5rem;
+            margin-top: 1.2rem;
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            text-align: center;
+            letter-spacing: 0.5px;
+            font-family: 'Space Mono', monospace;
+        }
+        .install-note .serif {
+            color: #c8c8c8;
+        }
+
+        /* ---------- FOOTER ---------- */
+        footer {
+            border-top: 3px double var(--border);
+            margin-top: 4rem;
+            padding: 2.5rem 0 2rem;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+        .footer-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+        .footer-brand {
+            font-family: 'DM Serif Display', 'Playfair Display', Georgia, serif;
+            font-weight: 400;
+            font-size: 1.3rem;
+            color: var(--orange);
+            font-style: italic;
+            margin-bottom: 0.3rem;
+        }
+        .telegram-link {
+            background: var(--surface);
+            padding: 0.2rem 1rem;
+            color: #d0d0d0;
+            border: 1px solid var(--border-light);
+            text-decoration: none;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            transition: 0.3s;
+        }
+        .telegram-link:hover {
+            border-color: var(--orange);
+        }
+        .footer-motto {
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            letter-spacing: 3px;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        /* ---------- ПАРАЛЛАКС-НАМЁК ---------- */
+        .parallax-subtle {
+            transition: transform 0.1s linear;
+            will-change: transform;
+        }
+
+        /* ---------- МОБИЛЬНЫЕ ПРАВКИ ---------- */
+        @media (max-width: 768px) {
+            .hero-desc {
+                max-width: 100%;
+            }
+            .hero-title {
+                font-size: 2.4rem;
+            }
+            .section-head h2 {
+                font-size: 1.5rem;
+            }
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .footer-motto {
+                display: none;
+            }
+            .parallax-subtle {
+                transform: none !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .cta-row {
+                flex-direction: column;
+            }
+            .btn-red, .btn-outline {
+                text-align: center;
+                width: 100%;
+            }
+            .loss-number {
+                font-size: 2rem;
+            }
+            .trophy-grid,
+            .reviews-grid {
+                grid-template-columns: 1fr;
+            }
+            footer {
+                text-align: center;
+            }
+            .footer-grid {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .trust-note {
+                flex-direction: column;
+                gap: 1.2rem;
+            }
+            .install-note {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ========== HEADER ========== -->
+    <header>
+        <div>
+            <div class="logo-line">
+                <span class="logo"><span class="mark">&#9768;</span> encrowmer</span>
+            </div>
+            <div class="tagline">Охотник за упущенной прибылью &middot; est. 2021</div>
+        </div>
+        <a href="https://t.me/encrowmer" target="_blank" class="contact-badge">
+            @encrowmer &#10142;
+        </a>
+    </header>
+
+    <!-- ========== HERO ========== -->
+    <section>
+        <div class="hero-grid">
+            <div>
+                <span class="pulp-label">Vol. 1 &middot; Охота на убыток</span>
+                <h1 class="hero-title" id="heroTitle">
+                    ВАШИ<br>
+                    <span class="red-block">КЛИЕНТЫ</span><br>
+                    УХОДЯТ
+                </h1>
+                <div class="hero-sub" id="heroSub">Тихо. Незаметно. Прямо сейчас.</div>
+                <p class="hero-desc" id="heroDesc">
+                    <span class="highlight-red">Вы теряете деньги из-за проблем на сайте.</span><br>
+                    Я нахожу эти точки и закрываю за <span class="highlight-red">3 дня</span>.<br>
+                    Платите один раз — получаете прирост клиентов каждый месяц.<br>
+                    <span class="highlight-orange">Вы в безоговорочном плюсе.</span>
+                </p>
+                <div class="loss-counter" id="lossCounter">
+                    <span class="loss-number" id="lossAmount">0 ₽</span>
+                    <span class="loss-label">упускаете вы, пока читаете это</span>
+                </div>
+                <div class="cta-row" id="ctaRow">
+                    <a href="https://t.me/encrowmer" target="_blank" class="btn-red" id="ctaButton">СВЯЗАТЬСЯ &middot; TELEGRAM</a>
+                    <button class="btn-outline" onclick="document.querySelector('footer').scrollIntoView({behavior:'smooth'})">&darr; КОНТАКТЫ</button>
+                </div>
+                <div class="install-note">
+                    <span class="serif">Внедрение:</span> ставлю сам за 15 минут. Или даю код — вставите по инструкции.
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-cell"><span class="notch"></span><span class="stat-num">14</span><span class="stat-lbl">Целей поражено</span></div>
+            <div class="stat-cell"><span class="notch"></span><span class="stat-num">+32%</span><span class="stat-lbl">Рост заявок</span></div>
+            <div class="stat-cell"><span class="notch"></span><span class="stat-num">3 дня</span><span class="stat-lbl">Срок операции</span></div>
+            <div class="stat-cell"><span class="notch"></span><span class="stat-num">100%</span><span class="stat-lbl">Ваша прибыль</span></div>
+        </div>
+    </section>
+
+    <div class="divider-vinyl">
+        <div class="groove"></div>
+    </div>
+
+    <!-- ========== ПРОЦЕСС ========== -->
+    <section>
+        <div class="section-head">
+            <span class="numeral">I.</span>
+            <h2>Как я работаю</h2>
+            <div class="subtitle">Метод, отточенный на четырнадцати мишенях</div>
+        </div>
+        <div class="process-grid">
+            <div class="process-card">
+                <div class="step-symbol">&#9993; // связь</div>
+                <h4>Вы пишете мне</h4>
+                <p>В Telegram — @encrowmer. Без заявок, без менеджеров. Отвечаю в течение часа.</p>
+            </div>
+            <div class="process-card">
+                <div class="step-symbol">&#8981; // разведка</div>
+                <h4>Я изучаю сайт</h4>
+                <p>Нахожу точки, где клиенты уходят без заявки. Присылаю видео с проблемой.</p>
+            </div>
+            <div class="process-card">
+                <div class="step-symbol">&#9874; // операция</div>
+                <h4>Правим за 3 дня</h4>
+                <p>Предоплата 50%. Я исправляю структуру сайта. Вы проверяете результат.</p>
+            </div>
+            <div class="process-card">
+                <div class="step-symbol">&#9733; // результат</div>
+                <h4>Вы в плюсе</h4>
+                <p>Оплачиваете остаток. Сайт приносит больше заявок. Работа окупается.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider-vinyl">
+        <div class="groove"></div>
+    </div>
+
+    <!-- ========== ПРОЗРАЧНОСТЬ ========== -->
+    <section>
+        <div class="trust-note">
+            <div class="col">
+                <div class="icon">&#10003; честный расчёт</div>
+                <h5>Без бюрократии</h5>
+                <p>Никаких договоров и бумажной волокиты. Оплата по факту готовности — просто и прозрачно.</p>
+            </div>
+            <div class="col">
+                <div class="icon">&#10003; география</div>
+                <h5>14 проектов</h5>
+                <p>Москва, Казань, Ростов-на-Дону, Новосибирск. Реальные кейсы, живые клиенты.</p>
+            </div>
+            <div class="col">
+                <div class="icon">&#10003; прямой контакт</div>
+                <h5>Вы общаетесь со мной</h5>
+                <p>Не с менеджером. Не с бригадиром. Я лично делаю работу от начала до конца.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider-vinyl">
+        <div class="groove"></div>
+    </div>
+
+    <!-- ========== ТРОФЕИ ========== -->
+    <section>
+        <div class="section-head">
+            <span class="numeral">II.</span>
+            <h2>Трофеи</h2>
+            <div class="subtitle">Что уже сделано. Что работает.</div>
+        </div>
+        <div class="trophy-grid">
+            <div class="trophy-card" onclick="this.classList.toggle('active')">
+                <div class="trophy-symbol">&#9654; кейс 01</div>
+                <div class="trophy-name">Магазин кроссовок</div>
+                <div class="trophy-type">Навигация по потребностям</div>
+                <div class="trophy-detail">
+                    <span class="red-label">[ДО]</span> Свалка моделей. Клиент не понимал, какие кроссовки для бега.<br>
+                    <span class="green-label">[ПОСЛЕ]</span> Категории: Трейл, Асфальт, Хайкинг, Восстановление.<br>
+                    <span class="highlight-green">+28% заявок за 2 недели.</span>
+                </div>
+                <span class="toggle-mark">[развернуть]</span>
+            </div>
+            <div class="trophy-card" onclick="this.classList.toggle('active')">
+                <div class="trophy-symbol">&#9654; кейс 02</div>
+                <div class="trophy-name">Стоматология</div>
+                <div class="trophy-type">Запись за один клик</div>
+                <div class="trophy-detail">
+                    <span class="red-label">[ДО]</span> Кнопка «Записаться» на 3-м экране. 60% уходили.<br>
+                    <span class="green-label">[ПОСЛЕ]</span> Красная кнопка на первом экране. 1 клик — заявка.<br>
+                    <span class="highlight-green">+41% записей за неделю.</span>
+                </div>
+                <span class="toggle-mark">[развернуть]</span>
+            </div>
+            <div class="trophy-card" onclick="this.classList.toggle('active')">
+                <div class="trophy-symbol">&#9654; кейс 03</div>
+                <div class="trophy-name">Автосервис</div>
+                <div class="trophy-type">Категории услуг</div>
+                <div class="trophy-detail">
+                    <span class="red-label">[ДО]</span> Услуги списком. Клиент искал «ремонт ходовой» 20 секунд.<br>
+                    <span class="green-label">[ПОСЛЕ]</span> Категории: Двигатель, Ходовая, Диагностика.<br>
+                    <span class="highlight-green">+19% звонков.</span>
+                </div>
+                <span class="toggle-mark">[развернуть]</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider-vinyl">
+        <div class="groove"></div>
+    </div>
+
+    <!-- ========== ОТЗЫВЫ ========== -->
+    <section>
+        <div class="section-head">
+            <span class="numeral">III.</span>
+            <h2>Отзывы</h2>
+            <div class="subtitle">Голоса с той стороны баррикад</div>
+        </div>
+        <div class="reviews-grid">
+            <div class="review-card">
+                <div class="review-text">Я думал, сайт нормальный. encrowmer нашёл 4 точки, где клиенты уходили. После правок заявки выросли на треть.</div>
+                <div class="review-footer">
+                    <div>
+                        <div class="review-author">Дмитрий</div>
+                        <div class="review-role">Владелец СТО, Ростов</div>
+                    </div>
+                    <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="review-text">Платил за рекламу, а заявок не было. Оказалось, кнопка не работала на айфонах. encrowmer починил за час.</div>
+                <div class="review-footer">
+                    <div>
+                        <div class="review-author">Ольга</div>
+                        <div class="review-role">Управляющая клиникой, Казань</div>
+                    </div>
+                    <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="review-text">За 3 дня пересобрал главную страницу. Клиенты перестали путаться в кроссовках. Продажи пошли вверх.</div>
+                <div class="review-footer">
+                    <div>
+                        <div class="review-author">Артём</div>
+                        <div class="review-role">Совладелец RunDay, Москва</div>
+                    </div>
+                    <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider-vinyl">
+        <div class="groove"></div>
+    </div>
+
+    <!-- ========== FOOTER ========== -->
+    <footer>
+        <div class="footer-grid">
+            <div>
+                <div class="footer-brand">encrowmer</div>
+                <div>аудит &middot; исправление &middot; рост</div>
+                <div class="dim">соло-специалист &middot; без посредников</div>
+            </div>
+            <div>
+                <span style="color:var(--orange); font-weight:700;">telegram:</span>
+                <a href="https://t.me/encrowmer" target="_blank" class="telegram-link">@encrowmer</a>
+                <div class="dim" style="margin-top:0.4rem;">прямой контакт &middot; отвечаю за час</div>
+            </div>
+            <div class="footer-motto">
+                Заявки растут.<br>
+                Клиенты не уходят.<br>
+                Вы в плюсе.
+            </div>
+        </div>
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // ========== СЧЁТЧИК ==========
+        let lossAmount = 0;
+        let greenMode = false;
+        const lossCounter = document.getElementById('lossCounter');
+        const lossAmountEl = document.getElementById('lossAmount');
+        const lossLabelEl = lossCounter?.querySelector('.loss-label');
+        const ctaButton = document.getElementById('ctaButton');
+        const lossBase = 124000;
+
+        setInterval(() => {
+            if (!greenMode) {
+                lossAmount += Math.floor(Math.random() * 180) + 60;
+            } else {
+                lossAmount -= Math.floor(Math.random() * 400) + 200;
+                if (lossAmount < 0) lossAmount = 0;
+            }
+            if (lossAmountEl) {
+                lossAmountEl.textContent = lossAmount.toLocaleString('ru-RU') + ' ₽';
+            }
+        }, 1000);
+
+        if (ctaButton && lossCounter) {
+            ctaButton.addEventListener('mouseenter', () => {
+                greenMode = true;
+                lossCounter.classList.add('green-mode');
+                if (lossLabelEl) lossLabelEl.textContent = 'возвращается тем, кто уже написал мне';
+                lossAmount = lossBase;
+                if (lossAmountEl) lossAmountEl.textContent = lossAmount.toLocaleString('ru-RU') + ' ₽';
+            });
+            ctaButton.addEventListener('mouseleave', () => {
+                greenMode = false;
+                lossCounter.classList.remove('green-mode');
+                if (lossLabelEl) lossLabelEl.textContent = 'упускаете вы, пока читаете это';
+                lossAmount = lossBase + Math.floor(Math.random() * 30000);
+                if (lossAmountEl) lossAmountEl.textContent = lossAmount.toLocaleString('ru-RU') + ' ₽';
+            });
+            ctaButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                greenMode = true;
+                lossCounter.classList.add('green-mode');
+                if (lossLabelEl) lossLabelEl.textContent = 'возвращается тем, кто уже написал мне';
+                lossAmount = lossBase;
+                if (lossAmountEl) lossAmountEl.textContent = lossAmount.toLocaleString('ru-RU') + ' ₽';
+                setTimeout(() => {
+                    window.open('https://t.me/encrowmer', '_blank');
+                }, 300);
+            });
+            ctaButton.addEventListener('touchend', () => {
+                setTimeout(() => {
+                    greenMode = false;
+                    lossCounter.classList.remove('green-mode');
+                    if (lossLabelEl) lossLabelEl.textContent = 'упускаете вы, пока читаете это';
+                    lossAmount = lossBase + Math.floor(Math.random() * 30000);
+                    if (lossAmountEl) lossAmountEl.textContent = lossAmount.toLocaleString('ru-RU') + ' ₽';
+                }, 1500);
+            });
+        }
+
+        // ========== ПЛАВНЫЙ SCROLL-REVEAL С ЗАДЕРЖКАМИ ==========
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    // Добавляем каскадную задержку для дочерних элементов
+                    const delay = el.dataset.revealDelay || 0;
+                    setTimeout(() => {
+                        el.classList.add('revealed');
+                    }, delay);
+                    revealObserver.unobserve(el);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+        // Назначаем цели с каскадными задержками
+        const revealTargets = [
+            { selector: '.hero-title', delay: 0 },
+            { selector: '.hero-sub', delay: 150 },
+            { selector: '.hero-desc', delay: 300 },
+            { selector: '.cta-row', delay: 450 },
+            { selector: '.stat-cell', delay: 0 },
+            { selector: '.section-head', delay: 100 },
+            { selector: '.process-card', delay: 0 },
+            { selector: '.trust-note', delay: 100 },
+            { selector: '.trophy-card', delay: 0 },
+            { selector: '.review-card', delay: 50 },
+        ];
+
+        revealTargets.forEach(({ selector, delay }) => {
+            document.querySelectorAll(selector).forEach(el => {
+                el.dataset.revealDelay = delay;
+                revealObserver.observe(el);
+            });
+        });
+
+        // Форсируем hero при загрузке
+        setTimeout(() => {
+            document.querySelectorAll('.hero-title, .hero-sub, .hero-desc, .cta-row').forEach(el => {
+                if (!el.classList.contains('revealed')) el.classList.add('revealed');
+            });
+        }, 250);
+
+        // ========== ЛЁГКИЙ ПАРАЛЛАКС ДЛЯ STAT-БЛОКА ==========
+        const statsRow = document.querySelector('.stats-row');
+        if (statsRow && window.innerWidth > 768) {
+            window.addEventListener('scroll', () => {
+                const rect = statsRow.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                if (rect.top < windowHeight && rect.bottom > 0) {
+                    const progress = (windowHeight - rect.top) / (windowHeight + rect.height);
+                    const offset = (progress - 0.5) * 12;
+                    statsRow.style.transform = `translateY(${offset}px)`;
+                    statsRow.style.transition = 'transform 0.15s linear';
+                }
+            }, { passive: true });
+        }
+
+        // ========== ЗАКРЫТИЕ КАРТОЧЕК ==========
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.trophy-card')) {
+                document.querySelectorAll('.trophy-card.active').forEach(card => {
+                    card.classList.remove('active');
+                });
+            }
+        });
+    })();
+</script>
+</body>
+</html>
