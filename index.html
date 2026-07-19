@@ -27,7 +27,113 @@
             --teal: #1a3a3a;
             --orange: #c85a17;
         }
+        /* ---------- АНИМИРОВАННЫЕ СЧЁТЧИКИ ---------- */
 
+        /* Определяем кастомное свойство с анимацией */
+        @property --num14 {
+            syntax: '<integer>';
+            initial-value: 9;
+            inherits: false;
+        }
+        @property --num32 {
+            syntax: '<integer>';
+            initial-value: 0;
+            inherits: false;
+        }
+        @property --num3 {
+            syntax: '<integer>';
+            initial-value: 0;
+            inherits: false;
+        }
+        @property --num100 {
+            syntax: '<integer>';
+            initial-value: 70;
+            inherits: false;
+        }
+
+        /* Сами счётчики */
+        .counter-14 {
+            --num: var(--num14);
+            counter-reset: count var(--num);
+            animation: count14 2s ease-out forwards paused;
+        }
+        .counter-14::after {
+            content: counter(count);
+        }
+
+        .counter-32 {
+            --num: var(--num32);
+            counter-reset: count var(--num);
+            animation: count32 2s ease-out forwards paused;
+        }
+        .counter-32::before {
+            content: '+';
+        }
+        .counter-32::after {
+            content: counter(count) '%';
+        }
+
+        .counter-3 {
+            --num: var(--num3);
+            counter-reset: count var(--num);
+            animation: count3 2s ease-out forwards paused;
+        }
+        .counter-3::after {
+            content: counter(count);
+        }
+
+        .counter-100 {
+            --num: var(--num100);
+            counter-reset: count var(--num);
+            animation: count100 2s ease-out forwards paused;
+        }
+        .counter-100::after {
+            content: counter(count) '%';
+        }
+
+        /* Keyframes */
+        @keyframes count14 {
+            from { --num14: 9; }
+            to   { --num14: 14; }
+        }
+        @keyframes count32 {
+            from { --num32: 0; }
+            to   { --num32: 28; }
+        }
+        @keyframes count3 {
+            from { --num3: 0; }
+            to   { --num3: 3; }
+        }
+        @keyframes count100 {
+            from { --num100: 70; }
+            to   { --num100: 99; }
+        }
+
+        /* Запуск анимации при появлении */
+        .stat-cell.revealed .stat-num {
+            animation-play-state: running;
+        }
+
+        /* Скрываем оригинальный текст — показываем только ::after */
+        .counter-14,
+        .counter-32,
+        .counter-3,
+        .counter-100 {
+            visibility: hidden;
+            position: relative;
+        }
+        .counter-14::after,
+        .counter-32::before,
+        .counter-32::after,
+        .counter-3::after,
+        .counter-100::after {
+            visibility: visible;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            text-align: center;
+        }
         * {
             margin: 0;
             padding: 0;
@@ -318,6 +424,7 @@
             opacity: 1;
             transform: translateY(0);
         }
+
         .hero-desc {
             font-size: 0.95rem;
             color: #9a9a9a;
@@ -597,7 +704,7 @@
             transform: translateY(0);
         }
         .trust-note::before {
-            content: 'без бюрократии';
+            content: 'честность';
             position: absolute;
             top: -0.55rem;
             left: 1.2rem;
@@ -958,10 +1065,26 @@
         </div>
 
         <div class="stats-row">
-            <div class="stat-cell"><span class="notch"></span><span class="stat-num">14</span><span class="stat-lbl">Целей поражено</span></div>
-            <div class="stat-cell"><span class="notch"></span><span class="stat-num">+32%</span><span class="stat-lbl">Рост заявок</span></div>
-            <div class="stat-cell"><span class="notch"></span><span class="stat-num">3 дня</span><span class="stat-lbl">Срок операции</span></div>
-            <div class="stat-cell"><span class="notch"></span><span class="stat-num">100%</span><span class="stat-lbl">Ваша прибыль</span></div>
+            <div class="stat-cell">
+                <span class="notch"></span>
+                <span class="stat-num counter-14">14</span>
+                <span class="stat-lbl">Проблем устранено</span>
+            </div>
+            <div class="stat-cell">
+                <span class="notch"></span>
+                <span class="stat-num counter-32">+26%</span>
+                <span class="stat-lbl">Рост заявок</span>
+            </div>
+            <div class="stat-cell">
+                <span class="notch"></span>
+                <span class="stat-num counter-3">3</span>
+                <span class="stat-lbl">Дня на работу</span>
+            </div>
+            <div class="stat-cell">
+                <span class="notch"></span>
+                <span class="stat-num counter-100">100%</span>
+                <span class="stat-lbl">Ваша прибыль</span>
+            </div>
         </div>
     </section>
 
@@ -978,22 +1101,22 @@
         </div>
         <div class="process-grid">
             <div class="process-card">
-                <div class="step-symbol">&#9993; // связь</div>
+                <div class="step-symbol">I</div>
                 <h4>Вы пишете мне</h4>
                 <p>В Telegram — @encrowmer. Без заявок, без менеджеров. Отвечаю в течение часа.</p>
             </div>
             <div class="process-card">
-                <div class="step-symbol">&#8981; // разведка</div>
+                <div class="step-symbol">II</div>
                 <h4>Я изучаю сайт</h4>
                 <p>Нахожу точки, где клиенты уходят без заявки. Присылаю видео с проблемой.</p>
             </div>
             <div class="process-card">
-                <div class="step-symbol">&#9874; // хирургия</div>
+                <div class="step-symbol">III</div>
                 <h4>Правим за 3 дня</h4>
                 <p>Предоплата 50%. Я исправляю структуру сайта. Вы проверяете результат.</p>
             </div>
             <div class="process-card">
-                <div class="step-symbol">&#9733; // результат</div>
+                <div class="step-symbol">IV</div>
                 <h4>Вы в плюсе</h4>
                 <p>Оплачиваете остаток. Сайт приносит больше заявок. Работа окупается.</p>
             </div>
@@ -1020,7 +1143,7 @@
             <div class="col">
                 <div class="icon">&#10003; прямой контакт</div>
                 <h5>Вы общаетесь со мной</h5>
-                <p>Не с менеджером. Не с бригадиром. Я лично делаю работу от начала до конца.</p>
+                <p>Не с менеджером. Не с бригадиром. Я лично беру заказ от начала до конца.</p>
             </div>
         </div>
     </section>
@@ -1046,7 +1169,7 @@
                     <span class="green-label">[ПОСЛЕ]</span> Категории: Трейл, Асфальт, Хайкинг, Восстановление.<br>
                     <span class="highlight-green">+28% заявок за 2 недели.</span>
                 </div>
-                <span class="toggle-mark">[развернуть]</span>
+                <span class="toggle-mark">подробнее</span>
             </div>
             <div class="trophy-card" onclick="this.classList.toggle('active')">
                 <div class="trophy-symbol">&#9654; кейс 02</div>
@@ -1057,7 +1180,7 @@
                     <span class="green-label">[ПОСЛЕ]</span> Красная кнопка на первом экране. 1 клик — заявка.<br>
                     <span class="highlight-green">+41% записей за неделю.</span>
                 </div>
-                <span class="toggle-mark">[развернуть]</span>
+                <span class="toggle-mark">подробнее</span>
             </div>
             <div class="trophy-card" onclick="this.classList.toggle('active')">
                 <div class="trophy-symbol">&#9654; кейс 03</div>
@@ -1068,7 +1191,7 @@
                     <span class="green-label">[ПОСЛЕ]</span> Категории: Двигатель, Ходовая, Диагностика.<br>
                     <span class="highlight-green">+19% звонков.</span>
                 </div>
-                <span class="toggle-mark">[развернуть]</span>
+                <span class="toggle-mark">подробнее</span>
             </div>
         </div>
     </section>
@@ -1082,11 +1205,11 @@
         <div class="section-head">
             <span class="numeral">III.</span>
             <h2>Отзывы</h2>
-            <div class="subtitle">Голоса с той стороны баррикад</div>
+            <div class="subtitle">Голоса с той стороны</div>
         </div>
         <div class="reviews-grid">
             <div class="review-card">
-                <div class="review-text">Я думал, сайт нормальный. encrowmer нашёл 4 точки, где клиенты уходили. После правок заявки выросли на треть.</div>
+                <div class="review-text">Думал сайт нормальный, мастер нашел 4 проблемы и исправил</div>
                 <div class="review-footer">
                     <div>
                         <div class="review-author">Дмитрий</div>
@@ -1096,17 +1219,17 @@
                 </div>
             </div>
             <div class="review-card">
-                <div class="review-text">Платил за рекламу, а заявок не было. Оказалось, кнопка не работала на айфонах. encrowmer починил за час.</div>
+                <div class="review-text">Оказывается кнопка рекламы не работала на айфонах, починили</div>
                 <div class="review-footer">
                     <div>
                         <div class="review-author">Ольга</div>
-                        <div class="review-role">Управляющая клиникой, Казань</div>
+                        <div class="review-role">Клининг центр, Казань</div>
                     </div>
                     <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
                 </div>
             </div>
             <div class="review-card">
-                <div class="review-text">За 3 дня пересобрал главную страницу. Клиенты перестали путаться в кроссовках. Продажи пошли вверх.</div>
+                <div class="review-text">Пересобрал главную страницу на категории (бег и тд). Заявки реально выросли</div>
                 <div class="review-footer">
                     <div>
                         <div class="review-author">Артём</div>
